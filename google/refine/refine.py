@@ -23,12 +23,11 @@ import json
 import gzip
 import os
 import re
-import StringIO
+from io import StringIO
 import time
 import urllib
-import urllib2_file
-import urllib2
-import urlparse
+import urllib.request
+from urllib.parse import urlparse
 
 from google.refine import facet
 from google.refine import history
@@ -61,7 +60,7 @@ class RefineServer(object):
         param: query params dict
         project_id: project ID as string
 
-        Returns urllib2.urlopen iterable."""
+        Returns urllib.urlopen iterable."""
         url = self.server + '/command/core/' + command
         if data is None:
             data = {}
@@ -74,17 +73,17 @@ class RefineServer(object):
             else:
                 params['project'] = project_id
         if params:
-            url += '?' + urllib.urlencode(params)
-        req = urllib2.Request(url)
+            url += '?' + urllib.request.urlencode(params)
+        req = urllib.request.Request(url)
         if data:
             req.add_data(data)  # data = urllib.urlencode(data)
         #req.add_header('Accept-Encoding', 'gzip')
         try:
-            response = urllib2.urlopen(req)
-        except urllib2.HTTPError as e:
+            response = urllib.request.urlopen(req)
+        except urllib.request.HTTPDefaultErrorHandler as e:
             raise Exception('HTTP %d "%s" for %s\n\t%s' % (e.code, e.msg, e.geturl(), data))
-        except urllib2.URLError as e:
-            raise urllib2.URLError(
+        except urllib.URLError as e:
+            raise urllib.URLError(
                 '%s for %s. No Refine server reachable/running; ENV set?' %
                 (e.reason, self.server))
         if response.info().get('Content-Encoding', None) == 'gzip':
